@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Light (default) */
+:root {
+  --background: 255 255 255;
+  --foreground: 23 23 23;
+}
+
+/* Dark via .dark on <html> */
+:root.dark {
+  --background: 10 10 10;
+  --foreground: 237 237 237;
+}
+
+@layer base {
+  html, body {
+    height: 100%;
+    background-color: rgb(var(--background));
+    color: rgb(var(--foreground));
+    @apply font-sans antialiased;
+  }
+}

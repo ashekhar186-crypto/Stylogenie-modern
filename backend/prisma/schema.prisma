@@ -1,0 +1,83 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MEMBER
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(MEMBER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  items        Item[]
+}
+
+enum Section {
+  Tops
+  Bottoms
+  Dresses
+  Outerwear
+  Footwear
+  Accessories
+  Ethnicwear
+  Sportswear
+}
+
+enum Season {
+  Spring
+  Summer
+  Autumn
+  Winter
+}
+
+enum Occasion {
+  Casual
+  Formal
+  Sports
+  Party
+  Ethnic
+}
+
+model Item {
+  id                String    @id @default(cuid())
+  ownerId           String
+  owner             User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  imageUrl          String
+  title             String?
+  brand             String?
+  color             String[]  @default([])
+  material          String?
+  size              String?
+  price             Decimal?  @db.Decimal(10, 2)
+
+  season            Season?
+  occasion          Occasion?
+  styleTags         String[]  @default([])
+  notes             String?
+  section           Section?
+
+  predictedLabels   String[]  @default([])
+  confidences       Float[]   @default([])
+  dominantColorHex  String?
+  approved          Boolean   @default(false)
+  archived          Boolean   @default(false)
+  searchText        String?
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([ownerId, createdAt(sort: Desc)])
+}
