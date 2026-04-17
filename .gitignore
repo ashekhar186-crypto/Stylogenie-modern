@@ -5,11 +5,14 @@ frontend/node_modules/
 .DS_Store
 
 backend/.env
+backend/.uploads/
 backend/dist/
 backend/uploads/
+backend/backend/
 cookie.txt
 cookies.txt
 StyloGenie_IEEE_Report.docx
+frontend/.eve.local
 .next/
 frontend/.next/
 dist/
