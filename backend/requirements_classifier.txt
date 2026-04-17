@@ -1,0 +1,15 @@
+# StyloGenie Fashion Classifier — Python dependencies
+# Install: pip install -r requirements_classifier.txt
+#
+# One-time model download: ~400 MB (patrickjohncyh/fashion-clip)
+# Model cached to ~/.cache/huggingface/hub after first run
+
+fastapi>=0.110.0
+uvicorn>=0.29.0
+transformers>=4.40.0
+torch>=2.2.0           # CPU-only is fine; MPS (Apple Silicon) auto-detected
+Pillow>=10.0.0
+scikit-learn>=1.4.0
+numpy>=1.26.0
+requests>=2.31.0
+pydantic>=2.0.0

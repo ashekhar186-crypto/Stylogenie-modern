@@ -291,9 +291,7 @@ router.post("/upload", requireAuth, upload.single("image"), async (req, res) => 
     console.error("predict upload error:", errorString(e));
     return res.status(500).json({ error: errorString(e) });
   } finally {
-    try {
-      fs.unlinkSync(filePath);
-    } catch {}
+    fs.unlink(filePath, () => {}); // async — won't block response
   }
 });
 

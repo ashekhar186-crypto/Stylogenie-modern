@@ -16,24 +16,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // try refresh once on mount to obtain tokens/session
+  // On mount: refresh tokens, then fetch /me to restore session
   useEffect(() => {
-    let done = false;
+    let cancelled = false;
     (async () => {
       try {
         await api.post("/api/v1/auth/refresh");
-        // optionally fetch /me if you add it; for now, decode minimal user from a small ping
-        // quick hack: call an endpoint that returns user; if not available, keep null
-        // we'll keep null and let login/register fill it after success.
+        // After refresh, fetch the current user
+        const { data } = await api.get("/api/v1/auth/me");
+        if (!cancelled && data?.user) setUser(data.user);
       } catch {
-        // ignore
+        // Not authenticated — user stays null
       } finally {
-        if (!done) setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     })();
-    return () => {
-      done = true;
-    };
+    return () => { cancelled = true; };
   }, []);
 
   const logout = async () => {

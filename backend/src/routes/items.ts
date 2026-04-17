@@ -51,7 +51,7 @@ router.post("/", requireAuth, async (req, res) => {
         section: data.section ?? null,
         season: data.season ?? null,
         occasion: data.occasion ?? null,
-        approved: false,
+        approved: true,
       },
     });
     res.status(201).json({ item });
@@ -64,6 +64,11 @@ router.post("/", requireAuth, async (req, res) => {
 // --- LIST (owner=me) ---
 router.get("/", requireAuth, async (req, res) => {
   try {
+    // Auto-approve any items that were saved before the approval flow was removed
+    await prisma.item.updateMany({
+      where: { ownerId: req.auth!.sub, approved: false },
+      data: { approved: true },
+    });
     const items = await prisma.item.findMany({
       where: { ownerId: req.auth!.sub, archived: false },
       orderBy: { createdAt: "desc" },
@@ -107,6 +112,47 @@ router.delete("/:id", requireAuth, async (req, res) => {
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: "Failed to delete item" });
+  }
+});
+
+// Feature 6: Laundry toggle — PUT /items/:id/laundry
+router.put("/:id/laundry", requireAuth, async (req, res) => {
+  const id = req.params.id;
+  try {
+    // Verify ownership
+    const existing = await prisma.item.findFirst({ where: { id, ownerId: req.auth!.sub } });
+    if (!existing) return res.status(404).json({ error: "Item not found" });
+
+    const updated = await (prisma.item.update as any)({
+      where: { id },
+      data: { inLaundry: !((existing as any).inLaundry ?? false) },
+    });
+    return res.json({ item: updated, inLaundry: updated.inLaundry });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ error: "Failed to toggle laundry" });
+  }
+});
+
+// Feature 7: Log a wear — POST /items/:id/wear
+router.post("/:id/wear", requireAuth, async (req, res) => {
+  const id = req.params.id;
+  try {
+    const existing = await prisma.item.findFirst({ where: { id, ownerId: req.auth!.sub } });
+    if (!existing) return res.status(404).json({ error: "Item not found" });
+
+    const updated = await (prisma.item.update as any)({
+      where: { id },
+      data: {
+        wearCount: { increment: 1 },
+        lastWorn: new Date(),
+        inLaundry: false, // wearing it means it's no longer in the laundry basket
+      },
+    });
+    return res.json({ item: updated, wearCount: updated.wearCount });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ error: "Failed to log wear" });
   }
 });
 

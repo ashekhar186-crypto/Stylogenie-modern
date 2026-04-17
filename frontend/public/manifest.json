@@ -1,0 +1,49 @@
+{
+  "name": "StyloGenie — AI Fashion Stylist",
+  "short_name": "StyloGenie",
+  "description": "Your personal AI fashion stylist — wardrobe management, outfit planning, and trend advice powered by Generative AI.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#060412",
+  "theme_color": "#7c3aed",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["lifestyle", "fashion", "productivity"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Describer",
+      "short_name": "Classify",
+      "description": "Classify a new garment with AI",
+      "url": "/describe",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Style Chat",
+      "short_name": "Chat",
+      "description": "Chat with GENIE about fashion",
+      "url": "/style-chat",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Outfit Studio",
+      "short_name": "Outfits",
+      "description": "AI outfit recommendations",
+      "url": "/recommend",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

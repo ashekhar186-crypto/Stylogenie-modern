@@ -3,6 +3,7 @@ import { z } from "zod";
 import argon2 from "argon2";
 import { prisma } from "../db/prisma";
 import { cookieOpts, signAccess, signRefresh, verifyRefresh } from "../utils/jwt";
+import { requireAuth } from "../middleware/auth";
 
 const router = Router();
 
@@ -87,6 +88,20 @@ router.post("/logout", (_req, res) => {
     .clearCookie("access_token", { ...cookieOpts })
     .clearCookie("refresh_token", { ...cookieOpts, path: "/api/v1/auth/refresh" })
     .json({ ok: true });
+});
+
+// GET /me — return current authenticated user
+router.get("/me", requireAuth, async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.auth!.sub },
+      select: { id: true, name: true, email: true, role: true },
+    });
+    if (!user) return res.status(404).json({ error: "User not found" });
+    return res.json({ user });
+  } catch {
+    return res.status(500).json({ error: "Failed to fetch user" });
+  }
 });
 
 export default router;

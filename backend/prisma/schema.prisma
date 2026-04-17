@@ -21,7 +21,10 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  items        Item[]
+  items          Item[]
+  tripPlans      TripPlan[]
+  outfitFeedback OutfitFeedback[]
+  outfitCalendar OutfitCalendar[]
 }
 
 enum Section {
@@ -76,8 +79,94 @@ model Item {
   archived          Boolean   @default(false)
   searchText        String?
 
+  // Deep classification fields (v2)
+  texture           String?
+  pattern           String?
+  fit               String?
+  silhouette        String?
+  styleEra          String?
+  careGuess         String?
+  deepSummary       String?
+
+  // 2025 Micro-trend intelligence (from CLIP classifier)
+  microTrend        String?   // e.g. "Quiet Luxury", "Ballet Core", "Dark Feminine"
+  trendiness        Float?    // 0.0 – 1.0 trendiness score for 2025
+
+  // Wear tracking & laundry (Features 6, 7)
+  inLaundry         Boolean   @default(false)
+  wearCount         Int       @default(0)
+  lastWorn          DateTime?
+
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
   @@index([ownerId, createdAt(sort: Desc)])
+}
+
+// Feature 1: Outfit Memory & Learning — persisted like/dislike per outfit suggestion
+model OutfitFeedback {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  outfitHash  String   // SHA-256 of item IDs sorted — deterministic per outfit combo
+  reaction    String   // "like" | "dislike" | "save"
+  outfitType  String?  // Western | Ethnic | Sport | Fusion
+  occasion    String?
+  itemIds     String[] @default([])
+  notes       String?
+
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, outfitHash])
+  @@index([userId, reaction])
+}
+
+// Feature 5: Outfit Calendar — plan outfits by date
+model OutfitCalendar {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  date        String   // ISO date "YYYY-MM-DD"
+  outfitLabel String?  // e.g. "Office Monday Look"
+  itemIds     String[] @default([])
+  outfitType  String?
+  occasion    String?
+  notes       String?
+  imageUrl    String?  // optional snapshot
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@index([userId, date])
+}
+
+model TripPlan {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  destination    String
+  startDate      String?
+  endDate        String?
+  bagType        String?
+  bagSize        String?
+  bagNotes       String?
+
+  weatherSummary String?
+  packingList    Json?
+  dailyOutfits   Json?
+  styleNotes     String?
+  avoidItems     String[]  @default([])
+  bookingLinks   Json?
+
+  // Feature 14: Packing checklist — track which items have been packed
+  checkedItems   String[]  @default([])
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([userId, createdAt(sort: Desc)])
 }
